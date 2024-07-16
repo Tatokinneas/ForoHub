@@ -1,13 +1,13 @@
-package com.forohub.forohub;
+package com.foroHub.foroHub;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ForohubApplication {
+public class ForoHubApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ForohubApplication.class, args);
+		SpringApplication.run(ForoHubApplication.class, args);
 	}
 
 }

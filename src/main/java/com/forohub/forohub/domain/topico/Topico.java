@@ -1,39 +1,71 @@
-package com.forohub.forohub.domain.topico;
+package com.foroHub.foroHub.domain.topico;
 
-import com.forohub.forohub.domain.curso.Curso;
-import com.forohub.forohub.domain.respuesta.Respuesta;
-import com.forohub.forohub.domain.usuario.Usuario;
+import com.foroHub.foroHub.domain.respuesta.Respuesta;
+import com.foroHub.foroHub.domain.usuario.Usuario;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import com.foroHub.foroHub.domain.curso.Curso;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-@Entity
-@Table(name="topicos")
+@Table(name = "topicos")
+@Entity(name = "Topico")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = "id")
 public class Topico {
-    @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
-    private Long id;
-    @NotBlank
-    private String titulo;
-    @NotBlank
-    private String mensaje;
-    @NotBlank
-    private Date fechaCreacion;
-    @NotBlank
-    private String status;
-    @ManyToOne
-    private Usuario autor;
-    @OneToMany(mappedBy = "topico", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<Curso> cursos;
-    @ManyToOne
-    private Respuesta respuesta;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String titulo;
+    private String mensaje;
+    private LocalDateTime fecha_creacion;
+    @Enumerated(EnumType.STRING)
+    private Status status;
+    @ManyToOne
+    @JoinColumn(name = "curso_id")
+    private Curso curso;
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
+    Usuario autor;
+    @OneToMany(mappedBy = "topico", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    List<Respuesta> respuestas;
+
+    public Topico(DtsRegisterTopico dtsRegisterTopico) {
+        this.titulo = dtsRegisterTopico.titulo();
+        this.mensaje = dtsRegisterTopico.mensaje();
+
+        LocalDateTime ahora = LocalDateTime.now();
+        DateTimeFormatter formateador = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String horaFormateada = ahora.format(formateador);
+        this.fecha_creacion = LocalDateTime.parse(horaFormateada, formateador);
+
+        this.status = Status.PENDIENTE;
+
+    }
+
+    public void actualizarDatos(DtsUpdateTopico dtsUpdateTopico, Curso curso, Usuario autor){
+        if (dtsUpdateTopico.titulo() != null) {
+            this.titulo = dtsUpdateTopico.titulo();
+        }
+        if (dtsUpdateTopico.mensaje() != null){
+            this.mensaje = dtsUpdateTopico.mensaje();
+        }
+        if (curso != null){
+            this.curso = curso;
+        }
+        if (autor != null){
+            this.autor = autor;
+        }
+        if (dtsUpdateTopico.estado() != null){
+            this.status = Status.fromString(dtsUpdateTopico.estado());
+        }
+    }
 }

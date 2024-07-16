@@ -1,34 +1,66 @@
-package com.forohub.forohub.domain.respuesta;
+package com.foroHub.foroHub.domain.respuesta;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import lombok.*;
-import com.forohub.forohub.domain.topico.Topico;
-import com.forohub.forohub.domain.usuario.Usuario;
-import java.util.Date;
-import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import com.foroHub.foroHub.domain.topico.Status;
+import com.foroHub.foroHub.domain.topico.Topico;
+import com.foroHub.foroHub.domain.usuario.Usuario;
 
-@Entity
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 @Table(name = "respuestas")
+@Entity(name = "Respuesta")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = "id")
 public class Respuesta {
-    @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
-    private Long id;
-    @NotBlank
-    private String mensaje;
-    @NotBlank
-    @OneToMany(mappedBy = "respuesta",cascade = CascadeType.ALL, fetch = FetchType.EAGER )
-    private List<Topico> topico;
-    @NotBlank
-    private Date fechaCreación;
-    @NotBlank
 
-    private Usuario autor;
-    @NotBlank
-    private String solucion;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String mensaje;
+    private LocalDateTime fecha_creacion;
+    @ManyToOne
+    @JoinColumn(name = "topico_id")
+    private Topico topico;
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
+    Usuario autor;
+    private Boolean solucion;
+
+    public Respuesta(DtsRegisterRespuesta dtsRegisterRespuesta, Topico topico, Usuario autor) {
+        this.mensaje = dtsRegisterRespuesta.mensaje();
+
+        LocalDateTime ahora = LocalDateTime.now();
+        DateTimeFormatter formateador = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String horaFormateada = ahora.format(formateador);
+        this.fecha_creacion = LocalDateTime.parse(horaFormateada, formateador);
+
+        this.topico = topico;
+        this.autor = autor;
+        this.solucion = false;
+    }
+
+    public void actualizarDatos(DtsActualizarRespuesta dtsActualizarRespuesta, Topico topico, Usuario autor) {
+        if (dtsActualizarRespuesta.mensaje() != null){
+            this.mensaje = dtsActualizarRespuesta.mensaje();
+        }
+        if (topico != null){
+            this.topico = topico;
+        }
+        if (autor != null){
+            this.autor = autor;
+        }
+        if (dtsActualizarRespuesta.solucion() != null){
+            if (dtsActualizarRespuesta.solucion()){
+                this.solucion = true;
+                this.topico.setStatus(Status.POSTEADO);
+            }else{
+                this.solucion = false;
+            }
+        }
+    }
 }
