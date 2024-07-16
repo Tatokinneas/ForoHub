@@ -7,24 +7,27 @@ import lombok.*;
 
 import java.util.Set;
 
-@Entity
-@Table(name = "perfil")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode(of = "id")
-public class Perfil {
-    @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
-    private Long id;
-    @NotBlank
-    private String nombrePerfil;
-    @ManyToMany
-    @JoinTable(
-            name = "usuario_perfil",
-            joinColumns = @JoinColumn(name = "perfil_id"),
-            inverseJoinColumns = @JoinColumn(name = "usuario_id")
-    )
-    private Set<Usuario> usuarios;
+public enum Perfil {
+    ADMINISTRADOR("Administrador"),
+    MODERADOR("Moderador"),
+    INSTRUCTOR("Instructor"),
+    AYUDANTE("Ayudante"),
+    ESTUDIANTE("Estudiante");
+
+    private String perfil;
+
+    Perfil(String perfil) {
+        this.perfil = perfil;
+    }
+
+    public static Perfil fromString(String text) {
+        for (Perfil perfil : Perfil.values()) {
+            if (perfil.perfil.equalsIgnoreCase(text)) {
+                return perfil;
+            }
+        }
+        throw new IllegalArgumentException("Ningún perfil fue encontrado: " + text);
+    }
+
+
 }
