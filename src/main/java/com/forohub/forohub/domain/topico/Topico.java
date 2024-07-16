@@ -4,9 +4,10 @@ import com.forohub.forohub.domain.curso.Curso;
 import com.forohub.forohub.domain.respuesta.Respuesta;
 import com.forohub.forohub.domain.usuario.Usuario;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
-import java.util.Date;
+import java.sql.Date;
 import java.util.List;
 
 @Entity
@@ -17,15 +18,22 @@ import java.util.List;
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
 public class Topico {
+    @Id
+    @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Long id;
+    @NotBlank
     private String titulo;
+    @NotBlank
     private String mensaje;
+    @NotBlank
     private Date fechaCreacion;
+    @NotBlank
     private String status;
     @ManyToOne
-    private List<Usuario> autor;
-    @OneToMany
+    private Usuario autor;
+    @OneToMany(mappedBy = "topico", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Curso> cursos;
-    @ManyToMany
-    private Respuesta respuestas;
+    @ManyToOne
+    private Respuesta respuesta;
+
 }
