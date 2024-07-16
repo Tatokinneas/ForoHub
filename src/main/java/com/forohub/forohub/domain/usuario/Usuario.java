@@ -3,7 +3,6 @@ package com.forohub.forohub.domain.usuario;
 import com.forohub.forohub.domain.perfil.Perfil;
 import com.forohub.forohub.domain.topico.Topico;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -30,11 +29,18 @@ public class Usuario implements UserDetails {
     private String email;
 
     private String contrasena;
-    @ManyToMany(mappedBy = "usuarios")
-    private Set<Perfil> perfiles;
+    @Enumerated(EnumType.STRING)
+    private Perfil perfiles;
 
     @OneToMany(mappedBy = "autor", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Topico> topicos;
+
+    public Usuario(DtoRegisterUsuario datosRegistroUsuario) {
+        this.nombre = datosRegistroUsuario.nombre();
+        this.email = datosRegistroUsuario.email();
+        this.contrasena = datosRegistroUsuario.contrasena();
+        this.perfiles = Perfil.fromString(datosRegistroUsuario.perfiles().name());
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
